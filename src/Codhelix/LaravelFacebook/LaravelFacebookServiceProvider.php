@@ -1,4 +1,4 @@
-<?php namespace Thomaswelton\LaravelFacebook;
+<?php namespace Codhelix\LaravelFacebook;
 
 use Illuminate\Support\ServiceProvider;
 
@@ -30,10 +30,9 @@ class LaravelFacebookServiceProvider extends ServiceProvider {
 	 */
 	public function register()
 	{
-		$this->app['facebook'] = $this->app->share(function($app)
-        {
-            return new Facebook;
-        });
+		$this->app['facebook'] = $this->app->share( function($app) {
+			return new Facebook;
+		});
 	}
 
 	/**
