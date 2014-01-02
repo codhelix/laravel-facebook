@@ -18,7 +18,7 @@ class LaravelFacebookServiceProvider extends ServiceProvider {
 	 */
 	public function boot()
 	{
-		$this->package('thomaswelton/laravel-facebook');
+		$this->package('codhelix/laravel-facebook');
 
 		include __DIR__.'/../../routes.php';
 	}

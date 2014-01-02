@@ -18,7 +18,7 @@
             "src/migrations"
         ],
         "psr-0": {
-            "Thomaswelton\\LaravelFacebook": "src/",
+            "Codhelix\\LaravelFacebook": "src/",
             "Facebook\\php": "vendor/facebook/php-sdk/src/"
         }
     },
