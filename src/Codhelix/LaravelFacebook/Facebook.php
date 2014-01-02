@@ -95,13 +95,22 @@ class Facebook extends \Facebook\Facebook {
 		return Config::get('laravel-facebook::scope');
 	}
 
-	public function getTabAppUrl( $redirect=false ){
+	public function getSecret() {
+		return Config::get('laravel-facebook::secret');
+	}
+
+	public function getTabAppUrl( $redirect=false, $withRequestParams = false ){
+
 		$pageId = $this->getPageId();
 
 		if($pageId){
 			$appId = $this->getAppId();
 
 			$url = "http://www.facebook.com/pages/null/{$pageId}?sk=app_{$appId}";
+
+			if ($withRequestParams) {
+				$url = $this->_urlWithRequestParams($url);
+			}
 
 			if ($redirect) {
 				$url = '<script type="text/javascript">window.top.location.href="'.$url.'"</script>';
@@ -166,4 +175,55 @@ class Facebook extends \Facebook\Facebook {
 	public function getCanvasUrl($path = '') {
 		return ($this->getNamespace()) ? 'http://apps.facebook.com/' . $this->getNamespace() . '/' . $path : null;
 	}
+
+
+	/**
+	 * Posts a notification to users
+	 *
+	 * This method pushes a message to
+	 *
+	 * @param string  $message the message that will be pushed to the user
+	 * @param boolean $user_id the user id that we are pushing the notification to
+	 *
+	 * @return mixed
+	 * @throws FBIgnitedException
+	 */
+	public function sendNotification($message, $user_id = null)
+	{
+		if ($user_id === null) {
+			$user_id = $this->getUser();
+		}
+
+		$access_token = $this->getAppId().'|'.$this->getSecret();
+
+		$data = array(
+			'href'         => '?notification_id=2',
+			'access_token' => $access_token,
+			'template'     => $message,
+		);
+
+		try {
+			$send_result = $this->api("/$user_id/notifications", 'post', $data);
+		} catch (FacebookApiException $e) {
+			$send_result = false;
+			Log::error($e);
+		}
+
+		return $send_result;
+	}
+
+
+	private function _urlWithRequestParams( $url ) {
+		$exclude = array('fb_locale', 'signed_request');
+
+		$separator = ( strstr($url, '?') ) ? '&' : '?';
+
+		foreach( $_REQUEST as $key => $value ) {
+			$url = $url.$separator.$key.'='.$value;
+			$separator = '&';
+		}
+
+		return $url;
+	}
 }
+
