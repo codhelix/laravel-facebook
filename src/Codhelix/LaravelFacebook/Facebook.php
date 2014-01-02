@@ -45,6 +45,29 @@ class Facebook extends \Facebook\Facebook {
 		}
 	}
 
+	public function getMe() {
+		$user = $this->getUser();
+
+		if($user){
+			try {
+				$me = $this->api('/me');
+			} catch(FacebookApiException $e){
+				var_dump($e);
+				$user = NULL;
+			}
+
+			return $me;
+		}
+		else {
+			$url = $this->getLoginUrl(array(
+				'redirect_uri' => $this->getTabAppUrl(),
+			));
+			$url = '<script type="text/javascript">window.top.location.href="'.$url.'"</script>';
+			echo $url;
+			exit;
+		}
+	}
+
 	public function getNamespace() {
 		return Config::get('laravel-facebook::namespace');
 	}
