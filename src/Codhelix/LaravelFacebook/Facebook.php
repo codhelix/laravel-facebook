@@ -13,6 +13,16 @@ class Facebook extends \Facebook\Facebook {
 		);
 
 		parent::__construct($config);
+
+		parse_str($_SERVER['QUERY_STRING'], $fbQueryStrings);
+
+		if (isset($fbQueryStrings['state'])) {
+			$_REQUEST['state'] = $fbQueryStrings['state'];
+		}
+
+		if (isset($fbQueryStrings['code'])) {
+			$_REQUEST['code'] = $fbQueryStrings['code'];
+		}
 	}
 
 	public function getSignedRequest($useSession = true) {
@@ -51,6 +61,8 @@ class Facebook extends \Facebook\Facebook {
 		if($user){
 			try {
 				$me = $this->api('/me');
+
+				Config::set('laravel-facebook::locale', $me['locale']);
 			} catch(FacebookApiException $e){
 				var_dump($e);
 				$user = NULL;
@@ -59,9 +71,7 @@ class Facebook extends \Facebook\Facebook {
 			return $me;
 		}
 		else {
-			$url = $this->getLoginUrl(array(
-				'redirect_uri' => $this->getTabAppUrl(),
-			));
+			$url = $this->getLoginUrl(array('scope' => $this->getScope()));
 			$url = '<script type="text/javascript">window.top.location.href="'.$url.'"</script>';
 			echo $url;
 			exit;
@@ -74,6 +84,14 @@ class Facebook extends \Facebook\Facebook {
 
 	public function getPageId() {
 		return Config::get('laravel-facebook::pageId');
+	}
+
+	public function getLocale() {
+		return Config::get('laravel-facebook::locale');
+	}
+
+	public function getScope() {
+		return Config::get('laravel-facebook::scope');
 	}
 
 	public function getTabAppUrl( $redirect=false ){
@@ -100,8 +118,10 @@ class Facebook extends \Facebook\Facebook {
 		if( $appId ) {
 			$shareUrl = new Url('https://www.facebook.com/dialog/feed');
 
-			$defaults = array(  'app_id' => $this->getAppId(),
-				'redirect_uri' => url());
+			$defaults = array(
+				'app_id' => $this->getAppId(),
+				'redirect_uri' => url()
+			);
 
 			$shareParams = array_merge($defaults, $data);
 		}
@@ -109,6 +129,7 @@ class Facebook extends \Facebook\Facebook {
 			// http://stackoverflow.com/questions/12547088/how-do-i-customize-facebooks-sharer-php
 			// Map the new og key names to the old sharer format
 			$sharerData = array();
+
 			foreach ($data as $key => $value) {
 				switch ($key) {
 				case 'link':
