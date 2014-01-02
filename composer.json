@@ -1,10 +1,10 @@
 {
-    "name": "thomaswelton/laravel-facebook",
+    "name": "codhelix/laravel-facebook",
     "description": "",
     "authors": [
         {
-            "name": "ThomasWelton",
-            "email": "thomaswelton@me.com"
+            "name": "Codhelix",
+            "email": "hola@codhelix.com"
         }
     ],
     "require": {
