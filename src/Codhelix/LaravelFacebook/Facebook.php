@@ -76,14 +76,21 @@ class Facebook extends \Facebook\Facebook {
 		return Config::get('laravel-facebook::pageId');
 	}
 
-	public function getTabAppUrl() {
+	public function getTabAppUrl( $redirect=false ){
 		$pageId = $this->getPageId();
 
-		if ( $pageId ) {
+		if($pageId){
 			$appId = $this->getAppId();
-			return "http://www.facebook.com/pages/null/{$pageId}?sk=app_{$appId}";
-		}
 
+			$url = "http://www.facebook.com/pages/null/{$pageId}?sk=app_{$appId}";
+
+			if ($redirect) {
+				$url = '<script type="text/javascript">window.top.location.href="'.$url.'"</script>';
+			}
+
+			return $url;
+
+		}
 		return null;
 	}
 
