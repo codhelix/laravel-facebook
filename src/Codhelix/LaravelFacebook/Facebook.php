@@ -3,6 +3,7 @@
 use Config;
 use Session;
 use \Purl\Url;
+use Illuminate\Support\Facades\Log;
 
 class Facebook extends \Facebook\Facebook {
 
@@ -61,11 +62,11 @@ class Facebook extends \Facebook\Facebook {
 		if($user){
 			try {
 				$me = $this->api('/me');
-
 				Config::set('laravel-facebook::locale', $me['locale']);
 			} catch(FacebookApiException $e){
-				var_dump($e);
+				Log::error($e);
 				$user = NULL;
+				$me   = null;
 			}
 
 			return $me;
@@ -107,8 +108,8 @@ class Facebook extends \Facebook\Facebook {
 			}
 
 			return $url;
-
 		}
+
 		return null;
 	}
 
