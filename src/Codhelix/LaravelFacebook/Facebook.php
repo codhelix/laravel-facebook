@@ -4,6 +4,7 @@ use Config;
 use Session;
 use \Purl\Url;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Http\Request;
 
 class Facebook extends \Facebook\Facebook {
 
@@ -59,22 +60,34 @@ class Facebook extends \Facebook\Facebook {
 	public function getMe() {
 		$user = $this->getUser();
 
-		if($user){
+		if ( $user ) {
 			try {
 				$me = $this->api('/me');
 				Config::set('laravel-facebook::locale', $me['locale']);
-			} catch(FacebookApiException $e){
+			} catch(FacebookApiException $e) {
+				$url  = $this->getLoginUrl( array('scope'=> $this->getScope()) );
 				Log::error($e);
+
 				$user = NULL;
 				$me   = null;
-			}
 
+				echo "<script language=\"javascript\" type=\"text/javascript\"> top.location.href=\"{$url}\"; </script>";
+				exit;
+			} catch(Exception $e) {
+				Log::error($e);
+			}
 			return $me;
 		}
 		else {
-			$url = $this->getLoginUrl(array('scope' => $this->getScope()));
-			$url = '<script type="text/javascript">window.top.location.href="'.$url.'"</script>';
-			echo $url;
+			$options = array('scope'=> $this->getScope());
+
+			$input = Request::createFromGlobals();
+			if ( $input->is('tab*') ) {
+				$options['redirect_uri'] = $this->getCanvasUrl();
+			}
+
+			$url  = $this->getLoginUrl( $options );
+			echo "<script language=\"javascript\" type=\"text/javascript\"> top.location.href=\"{$url}\"; </script>";
 			exit;
 		}
 	}
@@ -103,7 +116,7 @@ class Facebook extends \Facebook\Facebook {
 		return Config::get('laravel-facebook::secret');
 	}
 
-	public function getTabAppUrl( $redirect=false, $withRequestParams = false ){
+	public function getTabAppUrl( $redirect=false, $withRequestParams = false, $openInParent = true ){
 
 		$pageId = $this->getPageId();
 
@@ -116,8 +129,15 @@ class Facebook extends \Facebook\Facebook {
 				$url = $this->_urlWithRequestParams($url);
 			}
 
+			if ($openInParent ) {
+				$parent = ".top";
+			}
+			else {
+				$parent = "";
+			}
+
 			if ($redirect) {
-				$url = '<script type="text/javascript">window.top.location.href="'.$url.'"</script>';
+				$url = "<script type=\"text/javascript\">window{$parent}.location.href=\"{$url}\"</script>";
 			}
 
 			return $url;
