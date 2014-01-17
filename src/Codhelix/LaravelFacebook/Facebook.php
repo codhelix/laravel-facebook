@@ -64,9 +64,9 @@ class Facebook extends \Facebook\Facebook {
 			try {
 				$me = $this->api('/me');
 				Config::set('laravel-facebook::locale', $me['locale']);
-			} catch(FacebookApiException $e) {
+			} catch(\FacebookApiException $e) {
 				$url  = $this->getLoginUrl( array('scope'=> $this->getScope()) );
-				Log::error($e);
+				// Log::error($e);
 
 				$user = NULL;
 				$me   = null;
@@ -74,7 +74,7 @@ class Facebook extends \Facebook\Facebook {
 				echo "<script language=\"javascript\" type=\"text/javascript\"> top.location.href=\"{$url}\"; </script>";
 				exit;
 			} catch(Exception $e) {
-				Log::error($e);
+				// Log::error($e);
 			}
 			return $me;
 		}
@@ -228,7 +228,7 @@ class Facebook extends \Facebook\Facebook {
 
 		try {
 			$send_result = $this->api("/$user_id/notifications", 'post', $data);
-		} catch (FacebookApiException $e) {
+		} catch (\FacebookApiException $e) {
 			$send_result = false;
 			Log::error($e);
 		}
